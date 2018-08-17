@@ -392,7 +392,7 @@ func (d *Dpos) verifyDposField(chain consensus.ChainReader, header *types.Header
 		} else {
 			proposedList.insert(iheader.Coinbase[:])
 		}
-		if proposedList.size > (producerSize*2/3 + 1) {
+		if proposedList.size >= (producerSize*2/3 + 1) {
 			proposed = true
 			break
 		}
@@ -572,7 +572,7 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 		} else {
 			proposedList.insert(iheader.Coinbase[:])
 		}
-		if proposedList.size > (producerSize*2/3 + 1) {
+		if proposedList.size >= (producerSize*2/3 + 1) {
 			proposed = true
 			break
 		}
