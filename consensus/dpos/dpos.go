@@ -516,8 +516,7 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	lastHeader := chain.CurrentHeader()
 
 	// Set the correct difficulty
-	header.Difficulty = new(big.Int)
-	header.Difficulty.Set(difficulty)
+	header.Difficulty = new(big.Int).Set(difficulty)
 
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
