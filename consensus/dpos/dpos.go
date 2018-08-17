@@ -546,9 +546,7 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 
 	// Try to propose a new active producers scheme when pending producers'block become IBM
 	if lastHeader.ProposePendingProducersBlock.Cmp(lastHeader.DposIBM) == 0 && lastHeader.ProposePendingProducersBlock.Uint64() != 0 {
-		tmp := &(chain.GetHeaderByNumber(lastHeader.ProposePendingProducersBlock.Uint64()).PendingProducers)
-		header.ActiveProducers = make([]common.Address, len(*tmp))
-		copy(header.ActiveProducers, *tmp)
+		header.ActiveProducers = chain.GetHeaderByNumber(lastHeader.ProposePendingProducersBlock.Uint64()).PendingProducers
 		header.ActiveVersion = lastHeader.ActiveVersion + 1
 	}
 
