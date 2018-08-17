@@ -539,12 +539,9 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	copy(header.PendingProducers, lastHeader.PendingProducers)
 	copy(header.ActiveProducers, lastHeader.ActiveProducers)
 	header.PendingVersion = lastHeader.PendingVersion
-	header.ProposePendingProducersBlock = new(big.Int)
-	header.ProposePendingProducersBlock.Set(lastHeader.ProposePendingProducersBlock)
-	header.DposIBM = new(big.Int)
-	header.DposIBM.Set(lastHeader.DposIBM)
-	header.ProposedIBM = new(big.Int)
-	header.ProposedIBM.Set(lastHeader.ProposedIBM)
+	header.ProposePendingProducersBlock = new(big.Int).Set(lastHeader.ProposePendingProducersBlock)
+	header.DposIBM = new(big.Int).Set(lastHeader.DposIBM)
+	header.ProposedIBM = new(big.Int).Set(lastHeader.ProposedIBM)
 	header.ActiveVersion = lastHeader.ActiveVersion
 
 	// Try to propose a new active producers scheme when pending producers'block become IBM
