@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/deckarep/golang-set"
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/themis-network/go-themis/accounts"
 	"github.com/themis-network/go-themis/common"
@@ -370,8 +371,9 @@ func (d *Dpos) verifyDposField(chain consensus.ChainReader, header *types.Header
 		return errInvalidActiveProducerList
 	}
 	proposed := false
-	proposedList := set{0, make([]list, producerSize)}
+	proposedList := mapset.NewSet()
 	i := parent.Number.Uint64()
+	size := 0
 	for ; i != parent.ProposedIBM.Uint64(); i-- {
 		iheader := getHeader(chain, parents, number, i)
 		// Break if can not get header before current block
@@ -380,12 +382,12 @@ func (d *Dpos) verifyDposField(chain consensus.ChainReader, header *types.Header
 			break
 		}
 
-		if proposedList.find(iheader.Coinbase[:]) {
-			continue
+		if proposedList.Add(iheader.Coinbase) {
+			size++
 		} else {
-			proposedList.insert(iheader.Coinbase[:])
+			continue
 		}
-		if proposedList.size >= (producerSize*2/3 + 1) {
+		if size >= (producerSize*2/3 + 1) {
 			proposed = true
 			break
 		}
@@ -484,7 +486,7 @@ func (d *Dpos) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan
 	d.lock.RLock()
 	signer, signFn := d.signer, d.signFn
 	d.lock.RUnlock()
-	
+
 	// Set default field
 	lastHeader := chain.CurrentHeader()
 	// Just check signer can seal.
@@ -538,7 +540,7 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 
 	// Set nonce
 	copy(header.Nonce[:], nonce[:])
-	
+
 	// Get next block time, will return err is header.coinBase is unauthorized.
 	myBlockTime, err := d.getNextBlockTime(chain.GetHeaderByNumber(lastHeader.Number.Uint64()-1), lastHeader, header.Coinbase)
 	if err != nil {
@@ -576,7 +578,8 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 		return errInvalidActiveProducerList
 	}
 	proposed := false
-	proposedList := set{0, make([]list, producerSize)}
+	size := 0
+	proposedList := mapset.NewSet()
 	// Try to propose a new proposedIBM block(set proposedIBM block num)
 	i := lastHeader.Number.Uint64()
 	for ; i != lastHeader.ProposedIBM.Uint64(); i-- {
@@ -586,12 +589,12 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 			break
 		}
 
-		if proposedList.find(iheader.Coinbase[:]) {
-			continue
+		if proposedList.Add(iheader.Coinbase) {
+			size++
 		} else {
-			proposedList.insert(iheader.Coinbase[:])
+			continue
 		}
-		if proposedList.size >= (producerSize*2/3 + 1) {
+		if size >= (producerSize*2/3 + 1) {
 			proposed = true
 			break
 		}
