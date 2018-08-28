@@ -373,7 +373,6 @@ func (d *Dpos) verifyDposField(chain consensus.ChainReader, header *types.Header
 	proposed := false
 	proposedList := mapset.NewSet()
 	i := parent.Number.Uint64()
-	size := 0
 	for ; i != parent.ProposedIBM.Uint64(); i-- {
 		iheader := getHeader(chain, parents, number, i)
 		// Break if can not get header before current block
@@ -382,12 +381,10 @@ func (d *Dpos) verifyDposField(chain consensus.ChainReader, header *types.Header
 			break
 		}
 
-		if proposedList.Add(iheader.Coinbase) {
-			size++
-		} else {
+		if !proposedList.Add(iheader.Coinbase) {
 			continue
 		}
-		if size >= (producerSize*2/3 + 1) {
+		if proposedList.Cardinality() >= (producerSize*2/3 + 1) {
 			proposed = true
 			break
 		}
@@ -578,7 +575,6 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 		return errInvalidActiveProducerList
 	}
 	proposed := false
-	size := 0
 	proposedList := mapset.NewSet()
 	// Try to propose a new proposedIBM block(set proposedIBM block num)
 	i := lastHeader.Number.Uint64()
@@ -589,12 +585,10 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 			break
 		}
 
-		if proposedList.Add(iheader.Coinbase) {
-			size++
-		} else {
+		if !proposedList.Add(iheader.Coinbase) {
 			continue
 		}
-		if size >= (producerSize*2/3 + 1) {
+		if proposedList.Cardinality() >= (producerSize*2/3 + 1) {
 			proposed = true
 			break
 		}
