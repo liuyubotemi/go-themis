@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/deckarep/golang-set"
+	mapset "github.com/deckarep/golang-set"
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/themis-network/go-themis/accounts"
 	"github.com/themis-network/go-themis/common"
